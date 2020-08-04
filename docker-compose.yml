@@ -23,15 +23,10 @@ services:
       - ${PHP72_SLOWLOG_PATH}:/var/log/slow
       # 挂载PHP项目到容器中PHP默认访问目录
       - ${WWW}:/var/www/html
-      # 挂载supervisor配置文件
-      - ${SUPERVISOR_CONF_DIR}:/etc/supervisor
     restart: always
     ports:
       # 开启容器内部9000端口，外部端口自动分配
       - '9000'
-      # supervisor web管理后台端口映射
-      - 9001:9001
-    command: supervisord -nc /etc/supervisor/supervisord.conf
     container_name: php72
 
   # web 服务器 nginx
@@ -78,3 +73,34 @@ services:
       - "5672"
     restart: always
     container_name: rabbitmq
+
+  php-supervisor:
+    image: ${PHP72_IMAGE}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "20"
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      # 挂载PHP核心配置文件
+      - ${PHP72_PHP_CONF_FILE}:/usr/local/etc/php/php.ini
+      # 挂载php-fpm进程服务的配置文件
+      - ${PHP72_FPM_CONF_FILE}:/usr/local/etc/php-fpm.conf
+      # 挂载php-fpm进程服务的扩展配置文件
+      - ${PHP72_WWW_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf
+      # 挂载seaslog
+      - ${PHP72_SEASLOG_PATH}:/var/log/seaslog
+      # 挂载慢日志
+      - ${PHP72_SLOWLOG_PATH}:/var/log/slow
+      # 挂载PHP项目到容器中PHP默认访问目录
+      - ${WWW}:/var/www/html
+      # 挂载supervisor配置文件
+      - ${SUPERVISOR_CONF_DIR}:/etc/supervisor
+    restart: always
+    ports:
+      # supervisor web管理后台端口映射
+      - 9001:9001
+    command: supervisord -nc /etc/supervisor/supervisord.conf
+    container_name: php-supervisor
