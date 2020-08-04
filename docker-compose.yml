@@ -1,0 +1,101 @@
+version: '3.3'
+services:
+
+  php72:
+    image: ${PHP72_IMAGE}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "20"
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      # 挂载PHP核心配置文件
+      - ${PHP72_PHP_CONF_FILE}:/usr/local/etc/php/php.ini
+      # 挂载php-fpm进程服务的配置文件
+      - ${PHP72_FPM_CONF_FILE}:/usr/local/etc/php-fpm.conf
+      # 挂载php-fpm进程服务的扩展配置文件
+      - ${PHP72_WWW_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf
+      # 挂载seaslog
+      - ${PHP72_SEASLOG_PATH}:/var/log/seaslog
+      # 挂载慢日志
+      - ${PHP72_SLOWLOG_PATH}:/var/log/slow
+      # 挂载PHP项目到容器中PHP默认访问目录
+      - ${WWW}:/var/www/html
+    restart: always
+    ports:
+      # 开启容器内部9000端口，外部端口自动分配
+      - '9000'
+    container_name: php72
+
+  # web 服务器 nginx
+  nginx:
+    image: ${NGINX115_IMAGE}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "20"
+    volumes:
+        # 挂载本地nginx配置文件
+        - ${NGINX115_NGINX_CONF_FILE}:/etc/nginx/nginx.conf
+        # 挂载本地nginx 域名配置目录
+        - ${NGINX115_NGINX_CONFD_DIR}:/etc/nginx/conf.d
+        # 挂载本地SSL证书目录
+        - ${NGINX115_NGINX_CERT_DIR}:/etc/nginx/cert
+        # 挂载本地日志目录
+        - ${NGINX115_NGINX_LOG_DIR}:/var/log/nginx
+        # 挂载本地项目目录
+        - ${WWW}:/usr/share/nginx/html
+    restart: always
+    ports:
+      - '80:80'
+    container_name: nginx
+
+  # 消息中间件
+  rabbitmq:
+    image: ${RABBITMQ38_IMAGE}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "20"
+    hostname: ${RABBITMQ38_HOSTNAME}
+    environment:
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ38_COOKIE}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ38_WEB_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ38_WEB_PWD}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ38_WEB_VHOST}
+    ports:
+      # web后台 端口
+      - "15672:15672"
+      - "5672:5672"
+    restart: always
+    container_name: rabbitmq
+
+  # 仅用于队列使用
+  # supervisor:
+  #   image: registry.cn-beijing.aliyuncs.com/rdisme/supervisor:php-7.2-fpm-0
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   volumes:
+  #     # 挂载PHP核心配置文件
+  #     - ./supervisor/php-conf/php.ini:/usr/local/etc/php/php.ini
+  #     # 挂载php-fpm进程服务的配置文件
+  #     - ./supervisor/php-conf/php-fpm.conf:/usr/local/etc/php-fpm.conf
+  #     # 挂载php-fpm进程服务的扩展配置文件
+  #     - ./supervisor/php-conf/www.conf:/usr/local/etc/php-fpm.d/www.conf
+  #     # 挂载supervisor配置文件
+  #     - ./supervisor/config:/etc/supervisor
+  #     # 挂载PHP默认访问目录指向web根目录
+  #     - ./www:/var/www/html
+  #   restart: always
+  #   ports:
+  #     # supervisor web管理后台端口映射
+  #     - 9001:9001
+  #   command: supervisord -nc /etc/supervisor/supervisord.conf
+  #   container_name: supervisor
