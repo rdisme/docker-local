@@ -74,6 +74,20 @@ services:
     restart: always
     container_name: rabbitmq
 
+  activemq:
+    image: rmohr/activemq
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "20"
+    ports:
+      # web后台 端口
+      - "61616:61616"
+      - "8161:8161"
+    restart: always
+    container_name: activemq
+
   php-supervisor:
     image: ${PHP72_IMAGE}
     logging:
