@@ -82,8 +82,9 @@ services:
         max-size: "2m"
         max-file: "20"
     ports:
-      # web后台 端口
-      - "61616:61616"
+      # activemq服务监控端口
+      - "5672:61616"
+      # web管理页面端口
       - "8161:8161"
     restart: always
     container_name: activemq
