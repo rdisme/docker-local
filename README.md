@@ -51,3 +51,14 @@ supervisorctl restart program_name
 ```
 supervisorctl stop all
 ```
+
+
+
+
+
+### active mq
+
+示例：https://github.com/dejanb/stomp-php/tree/master/examples
+
+
+
