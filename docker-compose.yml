@@ -53,6 +53,45 @@ services:
       - '80:80'
     container_name: nginx
 
+  mysql:
+    image: registry.cn-beijing.aliyuncs.com/rdisme/mysql:8.0-0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "20"
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      # 挂载本地mysql 配置文件
+      - ./mysql8.0/conf/my.cnf:/etc/mysql/my.cnf
+      # 挂载本地mysql自定义配置目录
+      - ./mysql8.0/conf/my:/etc/mysql/conf.d
+      # 挂载本地数据持久化
+      - ./mysql8.0/data:/var/lib/mysql
+    environment:
+      # mysql root账号密码
+      MYSQL_ROOT_PASSWORD: KydtvwlF2j5aJwBd
+    ports:
+      # 容器内部端口3306，外部端口自动分配
+      - '3306'
+    container_name: mysql
+
+  redis:
+    image: registry.cn-beijing.aliyuncs.com/rdisme/redis:5-0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "20"
+    ports:
+      - "6379"
+    volumes:
+      - ./redis/redis.conf/:/usr/local/etc/redis.conf
+      - ./redis/data:/usr/local/redis/data
+    restart: always
+    container_name: redis
+
   # 消息中间件
   rabbitmq:
     image: ${RABBITMQ38_IMAGE}

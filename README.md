@@ -6,15 +6,15 @@
 
 
 
-### 启动node
+## supervisor
 
-```
-docker run -it -d -v /c/Users/rdisme/apps/docker-local/www:/apps -p 9527:9527 --rm --name mynode registry.cn-beijing.aliyuncs.com/rdisme/node:14.3.2
-```
+> web后台端口：9001
+>
+> 默认账号：user	123
 
 
 
-### supervisor
+管理命令
 
 1 . 更新新的配置到supervisord
 
@@ -56,9 +56,20 @@ supervisorctl stop all
 
 
 
-### active mq
+## active mq
 
-示例：https://github.com/dejanb/stomp-php/tree/master/examples
+> 示例：https://github.com/dejanb/stomp-php/tree/master/examples
+>
+> web管理端口：8161
+>
+> 默认账号：admin	admin
 
 
 
+
+
+## rabbit mq
+
+> web管理端口：15672
+>
+> 默认账号：rabbitmq  rabbitmq

@@ -1,9 +1,0 @@
-version: "3"
-services:
-    node:
-        image: registry.cn-beijing.aliyuncs.com/rdisme/node:14.3.2
-        volumes:
-            - ./apps:/apps
-        ports:
-            - '8081:8081'
-        # command: 'npm start'
