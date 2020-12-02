@@ -69,6 +69,7 @@ services:
       - ./mysql8.0/conf/my:/etc/mysql/conf.d
       # 挂载本地数据持久化
       - ./mysql8.0/data:/var/lib/mysql
+      - ./mysql8.0/mysql-files:/var/lib/mysql-files
     environment:
       # mysql root账号密码
       MYSQL_ROOT_PASSWORD: KydtvwlF2j5aJwBd
