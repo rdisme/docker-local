@@ -75,7 +75,7 @@ services:
       MYSQL_ROOT_PASSWORD: KydtvwlF2j5aJwBd
     ports:
       # 容器内部端口3306，外部端口自动分配
-      - '3306'
+      - '3306:3306'
     container_name: mysql
 
   redis:
