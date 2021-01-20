@@ -1,6 +1,6 @@
 # 本地测试
 upstream phpfpms-local {
-    server php-dev:9000;
+    server php72:9000;
 }
 
 server {

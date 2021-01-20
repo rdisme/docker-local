@@ -5,6 +5,14 @@
 本地开发环境
 
 
+## Nginx
+
+> 配置文件更新
+```
+cp local.conf.example local.conf
+```
+
+
 
 ## supervisor
 
