@@ -73,3 +73,13 @@ supervisorctl stop all
 > web管理端口：15672
 >
 > 默认账号：rabbitmq  rabbitmq
+
+## MySql 管理工具
+### phpMyAdmin
+> web管理端口：8080
+
+### adminer
+> web管理端口：8090
+
+## phpRedisAdmin
+> web管理端口：8081

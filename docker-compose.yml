@@ -27,6 +27,8 @@ services:
     ports:
       # 开启容器内部9000端口，外部端口自动分配
       - '9000'
+    networks:
+      - default
     container_name: php72
 
   # web 服务器 nginx
@@ -51,32 +53,30 @@ services:
     restart: always
     ports:
       - '80:80'
+    networks:
+      - default
     container_name: nginx
 
-  mysql:
-    image: registry.cn-beijing.aliyuncs.com/rdisme/mysql:8.0-0
+  mysql8:
+    image: mysql:${MYSQL_VERSION}
+    container_name: mysql8
+    ports:
+      - "${MYSQL_HOST_PORT}:3306"
+    volumes:
+      - ${MYSQL_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
+      - ${MYSQL_DATA_DIR}:/var/lib/mysql/:rw
     logging:
       driver: "json-file"
       options:
         max-size: "2m"
         max-file: "20"
-    restart: always
     command: --default-authentication-plugin=mysql_native_password
-    volumes:
-      # 挂载本地mysql 配置文件
-      - ./mysql8.0/conf/my.cnf:/etc/mysql/my.cnf
-      # 挂载本地mysql自定义配置目录
-      - ./mysql8.0/conf/my:/etc/mysql/conf.d
-      # 挂载本地数据持久化
-      - ./mysql8.0/data:/var/lib/mysql
-      - ./mysql8.0/mysql-files:/var/lib/mysql-files
+    restart: always
+    networks:
+      - default
     environment:
-      # mysql root账号密码
-      MYSQL_ROOT_PASSWORD: KydtvwlF2j5aJwBd
-    ports:
-      # 容器内部端口3306，外部端口自动分配
-      - '3306:3306'
-    container_name: mysql
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: "$TZ"
 
   redis:
     image: registry.cn-beijing.aliyuncs.com/rdisme/redis:5-0
@@ -90,6 +90,8 @@ services:
     volumes:
       - ./redis/redis.conf/:/usr/local/etc/redis.conf
       - ./redis/data:/usr/local/redis/data
+    networks:
+      - default
     restart: always
     container_name: redis
 
@@ -111,6 +113,8 @@ services:
       # web后台 端口
       - "15672:15672"
       - "5672"
+    networks:
+      - default
     restart: always
     container_name: rabbitmq
 
@@ -126,6 +130,8 @@ services:
       - "5672:61613"
       # web管理页面端口
       - "8161:8161"
+    networks:
+      - default
     restart: always
     container_name: activemq
 
@@ -153,9 +159,58 @@ services:
       - ${WWW}:/var/www/html
       # 挂载supervisor配置文件
       - ${SUPERVISOR_CONF_DIR}:/etc/supervisor
-    restart: always
     ports:
       # supervisor web管理后台端口映射
       - 9001:9001
+    networks:
+      - default
+    restart: always
     command: supervisord -nc /etc/supervisor/supervisord.conf
     container_name: php-supervisor
+
+  phpredisadmin:
+    image: erikdubbelboer/phpredisadmin:latest
+    ports:
+      - "${REDISMYADMIN_HOST_PORT}:80"
+    environment:
+      - REDIS_1_HOST=redis
+      - REDIS_1_PORT=6379
+      - TZ=$TZ
+    networks:
+      - default
+    container_name: phpredisadmin
+
+  # mysql admin
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   depends_on:
+  #     - mysql8
+  #   ports:
+  #     - 8090:8080
+  #   networks:
+  #     - default
+  #   container_name: adminer
+
+  # mysql admin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    depends_on:
+      - mysql8
+    ports:
+      - "${PHPMYADMIN_HOST_PORT}:80"
+    volumes:
+      - ${PHPMYADMIN_USER_CONF_FILE}:/etc/phpmyadmin/config.user.inc.php:ro
+      - ${PHPMYADMIN_PHP_CONF_FILE}:/usr/local/etc/php/conf.d/php-phpmyadmin.ini:ro
+    environment:
+      - PMA_HOST=mysql8
+      - PMA_PORT=3306
+      - TZ=$TZ
+    networks:
+      - default
+    container_name: phpmyadmin
+
+
+networks:
+  default:
