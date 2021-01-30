@@ -78,6 +78,27 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       TZ: "$TZ"
 
+  mysql8.0.23:
+    container_name: mysql8.0.23
+    image: mysql:${MYSQL_VERSION_1}
+    ports:
+      - "3306"
+    volumes:
+      - ${MYSQL_CONF_FILE_1}:/etc/mysql/conf.d/mysql.cnf:ro
+      - ${MYSQL_DATA_DIR_1}:/var/lib/mysql/:rw
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2m"
+        max-file: "20"
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    networks:
+      - default
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD_1}
+      TZ: "$TZ"
+
   redis:
     image: registry.cn-beijing.aliyuncs.com/rdisme/redis:5-0
     logging:
@@ -181,16 +202,16 @@ services:
     container_name: phpredisadmin
 
   # mysql admin
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   depends_on:
-  #     - mysql8
-  #   ports:
-  #     - 8090:8080
-  #   networks:
-  #     - default
-  #   container_name: adminer
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - mysql8.0.23
+    ports:
+      - 8090:8080
+    networks:
+      - default
+    container_name: adminer
 
   # mysql admin
   phpmyadmin:
