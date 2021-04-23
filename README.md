@@ -7,9 +7,13 @@
 
 ## Nginx
 
-> 配置文件更新
+配置文件更新
 ```
 cp local.conf.example local.conf
+```
+软重启
+```
+docker exec -it nginx nginx -s reload
 ```
 
 

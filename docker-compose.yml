@@ -1,91 +1,136 @@
 version: '3.3'
 services:
 
-  php72:
-    image: ${PHP72_IMAGE}
+  # ————————————————————————————————————↓ Jenkins ↓————————————————————————————————————
+  # jenkins:
+  #   container_name: jenkins
+  #   image: jenkinsci/blueocean
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   restart: always
+  #   environment:
+  #     TZ: "$TZ"
+  #   volumes:
+  #     - ${JENKINS}:/var/jenkins_home
+  #     #这项很重要，它可以使你在Jenkins所在的容器中，像宿主机一样操作其他容器
+  #     - ${DOCKERSOCK}:/var/run/docker.sock
+  #   ports:
+  #     - '8080:8080'
+  #     - '50000'
+  #   # 权限问题 指定root
+  #   user: root
+  # ————————————————————————————————————↑ Jenkins ↑————————————————————————————————————
+
+  # ————————————————————————————————————↓ PHP ↓————————————————————————————————————
+  php80:
+    container_name: php80
+    image: php:8.0-fpm
     logging:
       driver: "json-file"
       options:
         max-size: "2m"
         max-file: "20"
-    cap_add:
-      - SYS_PTRACE
+    restart: always
+    environment:
+      TZ: "$TZ"
     volumes:
-      # 挂载PHP核心配置文件
-      - ${PHP72_PHP_CONF_FILE}:/usr/local/etc/php/php.ini
-      # 挂载php-fpm进程服务的配置文件
-      - ${PHP72_FPM_CONF_FILE}:/usr/local/etc/php-fpm.conf
-      # 挂载php-fpm进程服务的扩展配置文件
-      - ${PHP72_WWW_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf
-      # 挂载seaslog
-      - ${PHP72_SEASLOG_PATH}:/var/log/seaslog
-      # 挂载慢日志
-      - ${PHP72_SLOWLOG_PATH}:/var/log/slow
       # 挂载PHP项目到容器中PHP默认访问目录
       - ${WWW}:/var/www/html
-    restart: always
     ports:
       # 开启容器内部9000端口，外部端口自动分配
       - '9000'
-    networks:
-      - default
-    container_name: php72
+    cap_add:
+      - SYS_PTRACE
 
-  # web 服务器 nginx
+  # php72:
+  #   container_name: php72
+  #   image: registry.cn-beijing.aliyuncs.com/rdisme/php:7.2-1-1.2
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   restart: always
+  #   environment:
+  #     TZ: "$TZ"
+  #   volumes:
+  #     # 挂载PHP核心配置文件
+  #     - ${PHP72}conf/php.ini:/usr/local/etc/php/php.ini
+  #     # 挂载php-fpm进程服务的配置文件
+  #     - ${PHP72}conf/php-fpm.conf:/usr/local/etc/php-fpm.conf
+  #     # 挂载php-fpm进程服务的扩展配置文件
+  #     - ${PHP72}conf/www.conf:/usr/local/etc/php-fpm.d/www.conf
+  #     # 挂载seaslog
+  #     - ${PHP72}log/seaslog:/var/log/seaslog
+  #     # 挂载慢日志
+  #     - ${PHP72}log/slow:/var/log/slow
+  #     # 挂载PHP项目到容器中PHP默认访问目录
+  #     - ${WWW}:/var/www/html
+  #   ports:
+  #     # 开启容器内部9000端口，外部端口自动分配
+  #     - '9000'
+  #   cap_add:
+  #     - SYS_PTRACE
+  # ————————————————————————————————————↑ PHP ↑————————————————————————————————————
+
+  # ————————————————————————————————————↓ nginx ↓————————————————————————————————————
   nginx:
-    image: ${NGINX115_IMAGE}
+    container_name: nginx
+    image: nginx:1.19
     logging:
       driver: "json-file"
       options:
         max-size: "2m"
         max-file: "20"
+    restart: always
+    environment:
+      TZ: "$TZ"
     volumes:
         # 挂载本地nginx配置文件
-        - ${NGINX115_NGINX_CONF_FILE}:/etc/nginx/nginx.conf
+        - ${NGINX}nginx.conf:/etc/nginx/nginx.conf
         # 挂载本地nginx 域名配置目录
-        - ${NGINX115_NGINX_CONFD_DIR}:/etc/nginx/conf.d
+        - ${NGINX}conf.d:/etc/nginx/conf.d
         # 挂载本地SSL证书目录
-        - ${NGINX115_NGINX_CERT_DIR}:/etc/nginx/cert
+        - ${NGINX}cert:/etc/nginx/cert
         # 挂载本地日志目录
-        - ${NGINX115_NGINX_LOG_DIR}:/var/log/nginx
+        - ${NGINX}log:/var/log/nginx
         # 挂载本地项目目录
         - ${WWW}:/usr/share/nginx/html
-    restart: always
     ports:
       - '80:80'
-    networks:
-      - default
-    container_name: nginx
+  # ————————————————————————————————————↑ nginx ↑————————————————————————————————————
 
-  mysql8:
-    image: mysql:${MYSQL_VERSION}
-    container_name: mysql8
-    ports:
-      - "${MYSQL_HOST_PORT}:3306"
-    volumes:
-      - ${MYSQL_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
-      - ${MYSQL_DATA_DIR}:/var/lib/mysql/:rw
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "2m"
-        max-file: "20"
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    networks:
-      - default
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      TZ: "$TZ"
+  # ————————————————————————————————————↓ mysql ↓————————————————————————————————————
+  # mysql8.0.13:
+  #   container_name: mysql8.0.13
+  #   image: mysql:8.0.13
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   restart: always
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - ${MYSQL8013}mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+  #     - ${MYSQL8013}data:/var/lib/mysql/:rw
+  #   command: --default-authentication-plugin=mysql_native_password
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: 888888
+  #     TZ: "$TZ"
 
   mysql8.0.23:
     container_name: mysql8.0.23
-    image: mysql:${MYSQL_VERSION_1}
+    image: mysql:8.0.23
     ports:
       - "3306"
     volumes:
-      - ${MYSQL_CONF_FILE_1}:/etc/mysql/conf.d/mysql.cnf:ro
-      - ${MYSQL_DATA_DIR_1}:/var/lib/mysql/:rw
+      - ${MYSQL8023}mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+      - ${MYSQL8023}data:/var/lib/mysql/:rw
     logging:
       driver: "json-file"
       options:
@@ -96,11 +141,39 @@ services:
     networks:
       - default
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD_1}
+      MYSQL_ROOT_PASSWORD: 888888
       TZ: "$TZ"
 
-  redis:
-    image: registry.cn-beijing.aliyuncs.com/rdisme/redis:5-0
+  # mysql admin
+  # adminer:
+  #   container_name: adminer
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8090:8080
+  #   networks:
+  #     - default
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin:latest
+    restart: always
+    ports:
+      - "8081:80"
+    volumes:
+      - ${PHPMYADMIN}config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro
+      - ${PHPMYADMIN}php-phpmyadmin.ini:/usr/local/etc/php/conf.d/php-phpmyadmin.ini:ro
+    environment:
+      # 此处host为mysql容器名
+      PMA_HOST: mysql8.0.23
+      PMA_PORT: 3306
+      TZ: "$TZ"
+  # ————————————————————————————————————↑ mysql ↑————————————————————————————————————
+
+  # ————————————————————————————————————↓ redis ↓————————————————————————————————————
+  redis5.0:
+    container_name: redis5.0
+    image: redis:5.0
     logging:
       driver: "json-file"
       options:
@@ -109,129 +182,92 @@ services:
     ports:
       - "6379"
     volumes:
-      - ./redis/redis.conf/:/usr/local/etc/redis.conf
-      - ./redis/data:/usr/local/redis/data
-    networks:
-      - default
+      - ${REDIS50}redis.conf/:/usr/local/etc/redis.conf
+      - ${REDIS50}data:/usr/local/redis/data
     restart: always
-    container_name: redis
-
-  # 消息中间件
-  rabbitmq:
-    image: ${RABBITMQ38_IMAGE}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "2m"
-        max-file: "20"
-    hostname: ${RABBITMQ38_HOSTNAME}
-    environment:
-      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ38_COOKIE}
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ38_WEB_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ38_WEB_PWD}
-      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ38_WEB_VHOST}
-    ports:
-      # web后台 端口
-      - "15672:15672"
-      - "5672"
-    networks:
-      - default
-    restart: always
-    container_name: rabbitmq
-
-  activemq:
-    image: rmohr/activemq
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "2m"
-        max-file: "20"
-    ports:
-      # activemq服务监控端口
-      - "5672:61613"
-      # web管理页面端口
-      - "8161:8161"
-    networks:
-      - default
-    restart: always
-    container_name: activemq
-
-  php-supervisor:
-    image: ${PHP72_IMAGE}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "2m"
-        max-file: "20"
-    cap_add:
-      - SYS_PTRACE
-    volumes:
-      # 挂载PHP核心配置文件
-      - ${PHP72_PHP_CONF_FILE}:/usr/local/etc/php/php.ini
-      # 挂载php-fpm进程服务的配置文件
-      - ${PHP72_FPM_CONF_FILE}:/usr/local/etc/php-fpm.conf
-      # 挂载php-fpm进程服务的扩展配置文件
-      - ${PHP72_WWW_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf
-      # 挂载seaslog
-      - ${PHP72_SEASLOG_PATH}:/var/log/seaslog
-      # 挂载慢日志
-      - ${PHP72_SLOWLOG_PATH}:/var/log/slow
-      # 挂载PHP项目到容器中PHP默认访问目录
-      - ${WWW}:/var/www/html
-      # 挂载supervisor配置文件
-      - ${SUPERVISOR_CONF_DIR}:/etc/supervisor
-    ports:
-      # supervisor web管理后台端口映射
-      - 9001:9001
-    networks:
-      - default
-    restart: always
-    command: supervisord -nc /etc/supervisor/supervisord.conf
-    container_name: php-supervisor
 
   phpredisadmin:
+    container_name: phpredisadmin
     image: erikdubbelboer/phpredisadmin:latest
     ports:
-      - "${REDISMYADMIN_HOST_PORT}:80"
+      - "8082:80"
     environment:
-      - REDIS_1_HOST=redis
-      - REDIS_1_PORT=6379
-      - TZ=$TZ
-    networks:
-      - default
-    container_name: phpredisadmin
+      REDIS_1_HOST: redis
+      REDIS_1_PORT: 6379
+      TZ: "$TZ"
+  # ————————————————————————————————————↑ redis ↑————————————————————————————————————
 
-  # mysql admin
-  adminer:
-    image: adminer
-    restart: always
-    depends_on:
-      - mysql8.0.23
-    ports:
-      - 8090:8080
-    networks:
-      - default
-    container_name: adminer
+  # ————————————————————————————————————↓ 消息中间件 ↓————————————————————————————————————
+  # rabbitmq:
+  #   container_name: rabbitmq
+  #   image: rabbitmq:3.8
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   hostname: myrabbitmq
+  #   environment:
+  #     RABBITMQ_ERLANG_COOKIE: SWQOKODSQALRPCLNMEQG
+  #     RABBITMQ_DEFAULT_USER: rabbitmq
+  #     RABBITMQ_DEFAULT_PASS: rabbitmq
+  #     RABBITMQ_DEFAULT_VHOST: /
+  #   ports:
+  #     # web后台 端口
+  #     - "15672:15672"
+  #     - "5672"
+  #   restart: always
 
-  # mysql admin
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    restart: always
-    depends_on:
-      - mysql8
-    ports:
-      - "${PHPMYADMIN_HOST_PORT}:80"
-    volumes:
-      - ${PHPMYADMIN_USER_CONF_FILE}:/etc/phpmyadmin/config.user.inc.php:ro
-      - ${PHPMYADMIN_PHP_CONF_FILE}:/usr/local/etc/php/conf.d/php-phpmyadmin.ini:ro
-    environment:
-      - PMA_HOST=mysql8
-      - PMA_PORT=3306
-      - TZ=$TZ
-    networks:
-      - default
-    container_name: phpmyadmin
+  # activemq:
+  #   image: rmohr/activemq
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   ports:
+  #     # activemq服务监控端口
+  #     - "5672:61613"
+  #     # web管理页面端口
+  #     - "8161:8161"
+  #   networks:
+  #     - default
+  #   restart: always
+  #   container_name: activemq
+  # ————————————————————————————————————↑ 消息中间件 ↑————————————————————————————————————
 
+  # php-supervisor:
+  #   container_name: php-supervisor
+  #   image: registry.cn-beijing.aliyuncs.com/rdisme/php:7.2-1-1.2
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   cap_add:
+  #     - SYS_PTRACE
+  #   volumes:
+  #     # 挂载supervisor配置文件
+  #     - ${SUPERVISOR}:/etc/supervisor
+  #     # 挂载PHP核心配置文件
+  #     - ${PHP72}conf/php.ini:/usr/local/etc/php/php.ini
+  #     # 挂载php-fpm进程服务的配置文件
+  #     - ${PHP72}conf/php-fpm.conf:/usr/local/etc/php-fpm.conf
+  #     # 挂载php-fpm进程服务的扩展配置文件
+  #     - ${PHP72}conf/www.conf:/usr/local/etc/php-fpm.d/www.conf
+  #     # 挂载seaslog
+  #     - ${PHP72}log/seaslog:/var/log/seaslog
+  #     # 挂载慢日志
+  #     - ${PHP72}log/slow:/var/log/slow
+  #     # 挂载PHP项目到容器中PHP默认访问目录
+  #     - ${WWW}:/var/www/html
+  #   ports:
+  #     # supervisor web管理后台端口映射
+  #     - 9001:9001
+  #   networks:
+  #     - default
+  #   restart: always
+  #   command: supervisord -nc /etc/supervisor/supervisord.conf
 
 networks:
   default:
