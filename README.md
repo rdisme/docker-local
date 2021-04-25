@@ -9,7 +9,7 @@
 
 配置文件更新
 ```
-cp local.conf.example local.conf
+cp default.conf.example default.conf
 ```
 软重启
 ```

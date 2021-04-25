@@ -1,0 +1,47 @@
+upstream phpfpms-local {
+    # 这里的php80是php容器名
+    server php80:9000;
+}
+
+server {
+    listen 80;
+    server_name localhost;
+
+    # 日志
+    access_log /var/log/nginx/80.access.log main;
+    error_log /var/log/nginx/80.error.log;
+
+    root /usr/share/nginx/html/admins-web;
+
+    location / {
+        index index.html index.htm;
+    }
+}
+
+server {
+    listen 81;
+    server_name localhost;
+
+    # 日志
+    access_log /var/log/nginx/81.access.log main;
+    error_log /var/log/nginx/81.error.log;
+
+    # nginx容器目录
+    root /usr/share/nginx/html;
+
+    location / {
+        index index.php index.html index.htm;
+        # 配置URL分段
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        # php容器目录
+        root /var/www/html;
+        fastcgi_pass phpfpms-local;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+}
