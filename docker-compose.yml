@@ -114,7 +114,7 @@ services:
   #       max-file: "20"
   #   restart: always
   #   ports:
-  #     - "3306:3306"
+  #     - "3306"
   #   volumes:
   #     - ${MYSQL8013}mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
   #     - ${MYSQL8013}data:/var/lib/mysql/:rw
@@ -150,7 +150,7 @@ services:
   #   image: adminer
   #   restart: always
   #   ports:
-  #     - 8090:8080
+  #     - 8081:8080
   #   networks:
   #     - default
 
@@ -159,7 +159,7 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     restart: always
     ports:
-      - "8081:80"
+      - "8082:80"
     volumes:
       - ${PHPMYADMIN}config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro
       - ${PHPMYADMIN}php-phpmyadmin.ini:/usr/local/etc/php/conf.d/php-phpmyadmin.ini:ro
@@ -190,7 +190,7 @@ services:
     container_name: phpredisadmin
     image: erikdubbelboer/phpredisadmin:latest
     ports:
-      - "8082:80"
+      - "8083:80"
     environment:
       REDIS_1_HOST: redis
       REDIS_1_PORT: 6379
@@ -214,7 +214,7 @@ services:
   #     RABBITMQ_DEFAULT_VHOST: /
   #   ports:
   #     # web后台 端口
-  #     - "15672:15672"
+  #     - "8084:15672"
   #     - "5672"
   #   restart: always
 
@@ -229,13 +229,14 @@ services:
   #     # activemq服务监控端口
   #     - "5672:61613"
   #     # web管理页面端口
-  #     - "8161:8161"
+  #     - "8085:8161"
   #   networks:
   #     - default
   #   restart: always
   #   container_name: activemq
   # ————————————————————————————————————↑ 消息中间件 ↑————————————————————————————————————
 
+  # ————————————————————————————————————↓ supervisor ↓————————————————————————————————————
   # php-supervisor:
   #   container_name: php-supervisor
   #   image: registry.cn-beijing.aliyuncs.com/rdisme/php:7.2-1-1.2
@@ -263,11 +264,28 @@ services:
   #     - ${WWW}:/var/www/html
   #   ports:
   #     # supervisor web管理后台端口映射
-  #     - 9001:9001
+  #     - 8086:9001
   #   networks:
   #     - default
   #   restart: always
   #   command: supervisord -nc /etc/supervisor/supervisord.conf
+  # ————————————————————————————————————↑ supervisor ↑————————————————————————————————————
+
+  # ————————————————————————————————————↓ showdoc在线文档 ↓————————————————————————————————————
+  showdoc:
+    container_name: showdoc
+    image: star7th/showdoc:latest
+    restart: always
+    ports:
+      - "8087:80"
+    volumes:
+      - ${SHOWDOC}html:/var/www/html/
+    environment:
+      TZ: "$TZ"
+    # 权限问题 指定root
+    user: root
+    privileged: true
+  # ————————————————————————————————————↑ showdoc在线文档 ↑————————————————————————————————————
 
 networks:
   default:
