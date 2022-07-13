@@ -18,37 +18,6 @@ docker-compose up -d
 ```
 
 
-
-## 端口介绍
-
-- 80 - 90
-> nginx 专用端口
-
-- 8080
-> jenkins web端口
-
-- 8081
-> mysql admin web端口
-
-- 8082
-> phpmyadmin web端口
-
-- 8083
-> redis admin web端口
-
-- 8084
-> rabbitmq web端口
-
-- 8085
-> activemq web端口
-
-- 8086
-> supervisor web端口
-
-- 8087
-> showdoc web端口
-
-
 ## 服务介绍
 
 ### Nginx

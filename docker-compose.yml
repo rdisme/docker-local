@@ -1,7 +1,6 @@
 version: '3.3'
 services:
 
-  # ————————————————————————————————————↓ Jenkins ↓————————————————————————————————————
   # jenkins:
   #   container_name: jenkins
   #   image: jenkinsci/blueocean
@@ -22,28 +21,26 @@ services:
   #     - '50000'
   #   # 权限问题 指定root
   #   user: root
-  # ————————————————————————————————————↑ Jenkins ↑————————————————————————————————————
 
-  # ————————————————————————————————————↓ PHP ↓————————————————————————————————————
-  php80:
-    container_name: php80
-    image: php:8.0-fpm
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "2m"
-        max-file: "20"
-    restart: always
-    environment:
-      TZ: "$TZ"
-    volumes:
-      # 挂载PHP项目到容器中PHP默认访问目录
-      - ${WWW}:/var/www/html
-    ports:
-      # 开启容器内部9000端口，外部端口自动分配
-      - '9000'
-    cap_add:
-      - SYS_PTRACE
+  # php80:
+  #   container_name: php80
+  #   image: php:8.0-fpm
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   restart: always
+  #   environment:
+  #     TZ: "$TZ"
+  #   volumes:
+  #     # 挂载PHP项目到容器中PHP默认访问目录
+  #     - ${WWW}:/var/www/html
+  #   ports:
+  #     # 开启容器内部9000端口，外部端口自动分配
+  #     - '9000'
+  #   cap_add:
+  #     - SYS_PTRACE
 
   # php72:
   #   container_name: php72
@@ -74,36 +71,32 @@ services:
   #     - '9000'
   #   cap_add:
   #     - SYS_PTRACE
-  # ————————————————————————————————————↑ PHP ↑————————————————————————————————————
 
-  # ————————————————————————————————————↓ nginx ↓————————————————————————————————————
-  nginx:
-    container_name: nginx
-    image: nginx:1.19
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "2m"
-        max-file: "20"
-    restart: always
-    environment:
-      TZ: "$TZ"
-    volumes:
-        # 挂载本地nginx配置文件
-        - ${NGINX}nginx.conf:/etc/nginx/nginx.conf
-        # 挂载本地nginx 域名配置目录
-        - ${NGINX}conf.d:/etc/nginx/conf.d
-        # 挂载本地SSL证书目录
-        - ${NGINX}cert:/etc/nginx/cert
-        # 挂载本地日志目录
-        - ${NGINX}log:/var/log/nginx
-        # 挂载本地项目目录
-        - ${WWW}:/usr/share/nginx/html
-    ports:
-      - '80-90:80-90'
-  # ————————————————————————————————————↑ nginx ↑————————————————————————————————————
+  # nginx:
+  #   container_name: nginx
+  #   image: nginx:1.19
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   restart: always
+  #   environment:
+  #     TZ: "$TZ"
+  #   volumes:
+  #       # 挂载本地nginx配置文件
+  #       - ${NGINX}nginx.conf:/etc/nginx/nginx.conf
+  #       # 挂载本地nginx 域名配置目录
+  #       - ${NGINX}conf.d:/etc/nginx/conf.d
+  #       # 挂载本地SSL证书目录
+  #       - ${NGINX}cert:/etc/nginx/cert
+  #       # 挂载本地日志目录
+  #       - ${NGINX}log:/var/log/nginx
+  #       # 挂载本地项目目录
+  #       - ${WWW}:/usr/share/nginx/html
+  #   ports:
+  #     - '80-90:80-90'
 
-  # ————————————————————————————————————↓ mysql ↓————————————————————————————————————
   # mysql8.0.13:
   #   container_name: mysql8.0.13
   #   image: mysql:8.0.13
@@ -123,26 +116,26 @@ services:
   #     MYSQL_ROOT_PASSWORD: 888888
   #     TZ: "$TZ"
 
-  mysql8.0.23:
-    container_name: mysql8.0.23
-    image: mysql:8.0.23
-    ports:
-      - "3306"
-    volumes:
-      - ${MYSQL8023}mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
-      - ${MYSQL8023}data:/var/lib/mysql/:rw
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "2m"
-        max-file: "20"
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    networks:
-      - default
-    environment:
-      MYSQL_ROOT_PASSWORD: 888888
-      TZ: "$TZ"
+  # mysql8.0.23:
+  #   container_name: mysql8.0.23
+  #   image: mysql:8.0.23
+  #   ports:
+  #     - "3306"
+  #   volumes:
+  #     - ${MYSQL8023}mysql.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+  #     - ${MYSQL8023}data:/var/lib/mysql/:rw
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   command: --default-authentication-plugin=mysql_native_password
+  #   restart: always
+  #   networks:
+  #     - default
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: 888888
+  #     TZ: "$TZ"
 
   # mysql admin
   # adminer:
@@ -154,50 +147,31 @@ services:
   #   networks:
   #     - default
 
-  phpmyadmin:
-    container_name: phpmyadmin
-    image: phpmyadmin/phpmyadmin:latest
-    restart: always
-    ports:
-      - "8082:80"
-    volumes:
-      - ${PHPMYADMIN}config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro
-      - ${PHPMYADMIN}php-phpmyadmin.ini:/usr/local/etc/php/conf.d/php-phpmyadmin.ini:ro
-    environment:
-      # 此处host为mysql容器名
-      PMA_HOST: mysql8.0.23
-      PMA_PORT: 3306
-      TZ: "$TZ"
-  # ————————————————————————————————————↑ mysql ↑————————————————————————————————————
+  # redis5.0:
+  #   container_name: redis5.0
+  #   image: redis:5.0
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   ports:
+  #     - "6379"
+  #   volumes:
+  #     - ${REDIS50}redis.conf/:/usr/local/etc/redis.conf
+  #     - ${REDIS50}data:/usr/local/redis/data
+  #   restart: always
 
-  # ————————————————————————————————————↓ redis ↓————————————————————————————————————
-  redis5.0:
-    container_name: redis5.0
-    image: redis:5.0
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "2m"
-        max-file: "20"
-    ports:
-      - "6379"
-    volumes:
-      - ${REDIS50}redis.conf/:/usr/local/etc/redis.conf
-      - ${REDIS50}data:/usr/local/redis/data
-    restart: always
+  # phpredisadmin:
+  #   container_name: phpredisadmin
+  #   image: erikdubbelboer/phpredisadmin:latest
+  #   ports:
+  #     - "8083:80"
+  #   environment:
+  #     REDIS_1_HOST: redis
+  #     REDIS_1_PORT: 6379
+  #     TZ: "$TZ"
 
-  phpredisadmin:
-    container_name: phpredisadmin
-    image: erikdubbelboer/phpredisadmin:latest
-    ports:
-      - "8083:80"
-    environment:
-      REDIS_1_HOST: redis
-      REDIS_1_PORT: 6379
-      TZ: "$TZ"
-  # ————————————————————————————————————↑ redis ↑————————————————————————————————————
-
-  # ————————————————————————————————————↓ 消息中间件 ↓————————————————————————————————————
   # rabbitmq:
   #   container_name: rabbitmq
   #   image: rabbitmq:3.8
@@ -234,9 +208,7 @@ services:
   #     - default
   #   restart: always
   #   container_name: activemq
-  # ————————————————————————————————————↑ 消息中间件 ↑————————————————————————————————————
 
-  # ————————————————————————————————————↓ supervisor ↓————————————————————————————————————
   # php-supervisor:
   #   container_name: php-supervisor
   #   image: registry.cn-beijing.aliyuncs.com/rdisme/php:7.2-1-1.2
@@ -269,23 +241,70 @@ services:
   #     - default
   #   restart: always
   #   command: supervisord -nc /etc/supervisor/supervisord.conf
-  # ————————————————————————————————————↑ supervisor ↑————————————————————————————————————
 
-  # ————————————————————————————————————↓ showdoc在线文档 ↓————————————————————————————————————
-  showdoc:
-    container_name: showdoc
-    image: star7th/showdoc:latest
-    restart: always
-    ports:
-      - "8087:80"
-    volumes:
-      - ${SHOWDOC}html:/var/www/html/
-    environment:
-      TZ: "$TZ"
-    # 权限问题 指定root
-    user: root
-    privileged: true
-  # ————————————————————————————————————↑ showdoc在线文档 ↑————————————————————————————————————
+  # showdoc:
+  #   container_name: showdoc
+  #   image: star7th/showdoc:latest
+  #   restart: always
+  #   ports:
+  #     - "8087:80"
+  #   volumes:
+  #     - ${SHOWDOC}html:/var/www/html/
+  #   environment:
+  #     TZ: "$TZ"
+  #   # 权限问题 指定root
+  #   user: root
+  #   privileged: true
 
-networks:
-  default:
+  # openjdk:
+  #   container_name: openjdk
+  #   image: openjdk:8
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   restart: always
+  #   stdin_open: true # docker run -i
+  #   tty: true # docker run -t
+  #   environment:
+  #     TZ: "$TZ"
+  #   volumes:
+  #     - ${WWW}:/www
+  #   ports:
+  #     - 8888:8080
+
+  # tomcat:
+  #   container_name: tomcat
+  #   image: tomcat:9
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   restart: always
+  #   environment:
+  #     TZ: "$TZ"
+  #   volumes:
+  #     - ${WWW}:/www
+  #   ports:
+  #     - 8080:8080
+
+  # node:
+  #   container_name: node
+  #   image: node:18.5
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "2m"
+  #       max-file: "20"
+  #   restart: always
+  #   stdin_open: true # docker run -i
+  #   tty: true # docker run -t
+  #   environment:
+  #     TZ: "$TZ"
+  #   volumes:
+  #     - ${WWW}:/www
+    # ports:
+      # 比如 npm run dev 此时的端口，需要映射到容器外部才能访问
+      # - '8080'
