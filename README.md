@@ -73,3 +73,13 @@ supervisorctl stop all
 
 ### showdoc
 https://www.showdoc.com.cn/help?page_id=65610
+
+### redis 管理工具
+#### redis-manager
+
+```
+CREATE DATABASE redis_manager;
+CREATE USER 'redis_manager'@'%' IDENTIFIED BY '888888';
+GRANT ALL PRIVILEGES ON redis_manager.* TO 'redis_manager'@'%';
+flush privileges;
+```

@@ -147,6 +147,7 @@ services:
   #   networks:
   #     - default
 
+######################################################################### ↓ redis ↓ ##########################################
   # redis5.0:
   #   container_name: redis5.0
   #   image: redis:5.0
@@ -162,15 +163,36 @@ services:
   #     - ${REDIS50}data:/usr/local/redis/data
   #   restart: always
 
-  # phpredisadmin:
-  #   container_name: phpredisadmin
-  #   image: erikdubbelboer/phpredisadmin:latest
-  #   ports:
-  #     - "8083:80"
+  # redis-commander:
+  #   image: rediscommander/redis-commander
   #   environment:
-  #     REDIS_1_HOST: redis
-  #     REDIS_1_PORT: 6379
-  #     TZ: "$TZ"
+  #     - TZ=$TZ
+  #     - REDIS_HOSTS=dev:redis:6379,local:redis:6379
+  #     - HTTP_USER=root
+  #     - HTTP_PASSWORD=888888
+  #   ports:
+  #     - 8081:8081
+  #   depends_on:
+  #     - redis
+  #   container_name: redis-commander
+
+  # redis-manager:
+  #   image: reasonduan/redis-manager
+  #   depends_on:
+  #     - redis
+  #   ports:
+  #      - "8182:8182"
+  #   networks:
+  #     - default
+  #   environment:
+  #     - TZ=$TZ
+  #     - DATASOURCE_DATABASE=redis_manager
+  #     - DATASOURCE_URL=jdbc:mysql://mysql8.0.26:3306/redis_manager?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2b8
+  #     - DATASOURCE_USERNAME=redis_manager
+  #     - DATASOURCE_PASSWORD=888888
+  #   restart: always
+  #   container_name: redis-manager
+######################################################################### ↑ redis ↑ ##########################################
 
   # rabbitmq:
   #   container_name: rabbitmq
